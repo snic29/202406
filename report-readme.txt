@@ -1,6 +1,6 @@
-To run this reports.py program, 
+To run this report.py program, 
 
-        python reports.py -file path/to/your/jsonfile.json -config path/to/your/configfile.txt  
+        python report.py -file path/to/your/jsonfile.json -config path/to/your/configfile.txt  
 
 python program to parse an input json file provided as argument at program execution using -file option. 
 The program will use a configuration file , provided as parameter using -config option , to instruct the program on the actual field to be extracted. For example: if json file has following format:
