@@ -3,19 +3,18 @@ import json
 import openpyxl  
   
 def lookupValue(searchString, fileName, sheetName, searchColumn, retValColumn):  
-    # Load the workbook and select the specified sheet  
-    workbook = openpyxl.load_workbook(fileName)  
-    sheet = workbook[sheetName]  
+    # Load the specified sheet of the Excel file into a DataFrame  
+    df = pd.read_excel(fileName, sheet_name=sheetName)  
       
-    # Iterate through the rows in the specified search column  
-    for row in sheet.iter_rows():  
-        # Check if the cell in the search column matches the searchString  
-        if row[searchColumn-1].value == searchString:  
-            # Return the value from the retValColumn of the same row  
-            return row[retValColumn-1].value  
+    # Try to find the first row where the searchColumn matches the searchString  
+    match = df[df[searchColumn] == searchString].head(1)  
+      
+    # If a match is found, return the value from the retValColumn of the same row  
+    if not match.empty:  
+        return match[retValColumn].values[0]  
       
     # If no match is found, return "None"  
-    return "None"  
+    return "None"
 """  
 # Example usage  
 fileName = 'example.xlsx'  # Replace with your actual file name  
