@@ -1,92 +1,40 @@
 import json  
-import argparse  
   
-def parse_config(config_lines):  
-    """  
-    Parse the configuration lines to extract patterns.  
-      
-    Parameters:  
-    - config_lines: A list of strings, each representing a line in the configuration file.  
-      
-    Returns:  
-    - A list of patterns to be used for matching against the JSON data.  
-    """  
-    patterns = []  
-    for line in config_lines:  
-        if line.strip():  # Remove any leading/trailing whitespace and check if line is not empty  
-            patterns.append(line.strip())  # Add the cleaned line to the list of patterns  
-    return patterns  
+def parse_json(input_file):  
+    # Load the JSON data from the file  
+    with open(input_file, 'r') as file:  
+        data = json.load(file)  
   
-def match_pattern(data, pattern):  
-    """  
-    Recursively match the pattern in the given data and yield the matched results.  
-      
-    Parameters:  
-    - data: The current level of JSON data being examined.  
-    - pattern: The pattern string that specifies the path to match in the JSON data.  
-      
-    Yields:  
-    - The data that matches the pattern.  
-    """  
-    keys = pattern.split('.')  # Split the pattern into keys based on '.'  
-    current_data = data  
-    for key in keys:  
-        if key == "*":  # Wildcard, indicating any key at this level  
-            if isinstance(current_data, dict):  # Ensure current data is a dictionary  
-                for k, v in current_data.items():  # Iterate through all key-value pairs  
-                    yield from match_pattern(v, '.'.join(keys[1:]))  # Recurse with remaining pattern  
-                return  
-        else:  
-            if key in current_data:  # If the key is present in the current data  
-                current_data = current_data[key]  # Move to the next level in the data  
+    # Initialize an empty dictionary for the output  
+    output = {}  
+  
+    # Function to recursively search for "Report" and "Result" keys  
+    def search_data(d):  
+        if isinstance(d, dict):  
+            if "Report" in d and "Result" in d:  # Check if both keys exist in the current dict  
+                report = d["Report"]  
+                result = d["Result"]  
+                output[report] = {}  # Initialize a dict for this report  
+                for test, outcome in result.items():  
+                    if outcome not in output[report]:  
+                        output[report][outcome] = []  
+                    output[report][outcome].append(test)  
             else:  
-                return  # Key not found, stop processing this branch  
-    yield current_data  # Yield the data that matches the pattern  
+                for key in d:  
+                    search_data(d[key])  # Recurse into the next level  
   
-def extract_info(json_data, config_lines):  
-    """  
-    Extract and print information from json_data based on the config_lines.  
-      
-    Parameters:  
-    - json_data: The parsed JSON data as a dictionary.  
-    - config_lines: A list of configuration lines specifying what to extract.  
-    """  
-    patterns = parse_config(config_lines)  # Parse the configuration to get patterns  
-    for pattern in patterns:  
-        if "{" in pattern:  # Special handling for patterns with conditions (e.g., Result{"POS"})  
-            base_pattern, value = pattern.split("{")  
-            value = value.rstrip("}")  # Remove the closing brace  
-            results = {}  
-            for result in match_pattern(json_data, base_pattern):  # Match the base pattern  
-                for k, v in result.items():  # Iterate through the matched results  
-                    if v == value:  # Check if the value matches the condition  
-                        if value not in results:  
-                            results[value] = []  
-                        results[value].append(k)  # Add the key to the results  
-            for val, keys in results.items():  
-                print(f"{val} : {','.join(keys)}")  # Print the results  
-        else:  
-            for result in match_pattern(json_data, pattern):  # For patterns without conditions  
-                print(f"{pattern.split('.')[-1]} : {result}")  # Print the matched result  
-        print("-----------")  
+    # Start the recursive search from the top level  
+    search_data(data)  
   
-def main():  
-    """  
-    Main function to parse command-line arguments and extract information from JSON based on configuration.  
-    """  
-    parser = argparse.ArgumentParser(description="Parse JSON file based on configuration.")  
-    parser.add_argument("-file", required=True, help="Path to the JSON file.")  
-    parser.add_argument("-config", required=True, help="Path to the configuration file.")  
-      
-    args = parser.parse_args()  # Parse command-line arguments  
-      
-    with open(args.file, 'r') as json_file:  # Open and read the JSON file  
-        json_data = json.load(json_file)  
-      
-    with open(args.config, 'r') as config_file:  # Open and read the configuration file  
-        config_lines = config_file.readlines()  
-      
-    extract_info(json_data, config_lines)  # Extract and print the required information  
+    return output  
   
-if __name__ == "__main__":  
-    main()  # Execute the main function  
+# Assuming the input JSON file is named 'input.json'  
+input_file = 'input.json'  
+parsed_data = parse_json(input_file)  
+  
+# Print the output or write it to a file  
+print(json.dumps(parsed_data, indent=2))  
+  
+# Optionally, write the output to a file  
+with open('output.json', 'w') as file:  
+    json.dump(parsed_data, file, indent=2)  
