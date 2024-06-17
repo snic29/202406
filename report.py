@@ -1,3 +1,68 @@
+import numpy as np  
+from scipy.spatial.distance import euclidean  
+  
+def find_surface_points(arr, color):  
+    """  
+    Find surface points of a given color.  
+    A surface point has at least one neighbor with a different color.  
+    """  
+    z, y, x = arr.shape  
+    surface_points = []  
+    for i in range(z):  
+        for j in range(y):  
+            for k in range(x):  
+                if arr[i, j, k] == color:  
+                    # Check neighbors  
+                    neighbors = []  
+                    for dz, dy, dx in [(-1, 0, 0), (1, 0, 0), (0, -1, 0), (0, 1, 0), (0, 0, -1), (0, 0, 1)]:  
+                        nz, ny, nx = i + dz, j + dy, k + dx  
+                        if 0 <= nz < z and 0 <= ny < y and 0 <= nx < x:  
+                            neighbors.append(arr[nz, ny, nx])  
+                    if any(neighbor != color for neighbor in neighbors):  
+                        surface_points.append((i, j, k))  
+    return surface_points  
+  
+def largest_distance_between_surface_points(surface_points):  
+    """  
+    Calculate the largest distance between any two surface points.  
+    """  
+    max_distance = 0  
+    point_pair = (None, None)  
+    for i, point1 in enumerate(surface_points):  
+        for point2 in surface_points[i+1:]:  
+            distance = euclidean(point1, point2)  
+            if distance > max_distance:  
+                max_distance = distance  
+                point_pair = (point1, point2)  
+    return max_distance, point_pair  
+  
+def analyze_prism(arr, colors):  
+    """  
+    Analyze the prism for each color.  
+    """  
+    for color in colors:  
+        surface_points = find_surface_points(arr, color)  
+        if surface_points:  
+            max_distance, point_pair = largest_distance_between_surface_points(surface_points)  
+            print(f"Color {color}: Largest distance is {max_distance} between points {point_pair[0]} and {point_pair[1]}")  
+            # Step 3 and 4 would require additional logic to find the largest distance of non-K contiguous color  
+            # This can be approached by iterating through each dimension and looking for contiguous segments of the same color  
+            # Then, calculate the distance for these segments.  
+  
+# Example usage  
+Z, Y, X = 5, 5, 5  # Dimensions of the prism  
+N = 2  # Number of items  
+colors = [1, 2]  # Colors of the items  
+arr = np.zeros((Z, Y, X))  # Initialize the prism with gas color K=0  
+  
+# Manually fill the array with item colors for demonstration  
+# In a real scenario, this would be determined by the 3D scanner data  
+arr[1:4, 1:4, 1:4] = 1  # Example item 1  
+arr[0:3, 0:3, 0:3] = 2  # Example item 2  
+  
+analyze_prism(arr, colors)  
+
+=============================
 import json  
 
 import openpyxl  
