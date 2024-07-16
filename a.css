@@ -55,3 +55,47 @@ body {
 </html>  
 
  
+------------------------
+from flask import Flask, render_template  
+import os  
+  
+app = Flask(__name__)  
+  
+@app.route('/select_file')  
+def select_file():  
+    directory_path = '/a/b/c'  # Specify the directory path  
+    try:  
+        # List all files in the directory  
+        file_names = [f for f in os.listdir(directory_path) if os.path.isfile(os.path.join(directory_path, f))]  
+    except FileNotFoundError:  
+        file_names = []  
+      
+    # Render the template, passing the file names  
+    return render_template('select_file.html', file_names=file_names)  
+  
+if __name__ == '__main__':  
+    app.run(debug=True)  
+
+ 
+Step 2: HTML Template to Display the Select List (select_file.html)
+
+ 
+Next, create an HTML template named select_file.html in the templates directory. This template will generate the <select> list dynamically based on the file names passed to it.
+
+<!DOCTYPE html>  
+<html>  
+<head>  
+    <title>Select File</title>  
+</head>  
+<body>  
+    <h1>Select a File</h1>  
+    <form action="/your_action" method="post"> <!-- Replace /your_action with your actual form action -->  
+        <select name="file_name">  
+            {% for file_name in file_names %}  
+            <option value="{{ file_name }}">{{ file_name }}</option>  
+            {% endfor %}  
+        </select>  
+        <input type="submit" value="Submit">  
+    </form>  
+</body>  
+</html>  
