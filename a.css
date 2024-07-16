@@ -1,0 +1,57 @@
+/* File: static/style.css */  
+  
+/* Style for the floating menu */  
+nav {  
+    position: fixed;  
+    top: 0;  
+    left: 0;  
+    width: 100%;  
+    background-color: #333;  
+    z-index: 1000;  
+}  
+nav ul {  
+    list-style-type: none;  
+    padding: 0;  
+    margin: 0;  
+    overflow: hidden;  
+}  
+nav ul li {  
+    float: left;  
+}  
+nav ul li a {  
+    display: block;  
+    color: white;  
+    text-align: center;  
+    padding: 14px 16px;  
+    text-decoration: none;  
+}  
+nav ul li a:hover {  
+    background-color: #ddd;  
+    color: black;  
+}  
+body {  
+    padding-top: 50px;  
+}  
+
+-------------------------------------
+<!DOCTYPE html>  
+<html>  
+<head>  
+    <title>Home</title>  
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">  
+</head>  
+<body>  
+    <nav>  
+        <ul>  
+            <li><a href="{{ url_for('upload') }}">Upload</a></li>  
+            <li><a href="{{ url_for('query_client') }}">Query Client</a></li>  
+        </ul>  
+    </nav>  
+    <div>  
+        <h1>Main Menu</h1>  
+        <!-- Your content here -->  
+    </div>  
+</body>  
+</html>  
+
+ 
